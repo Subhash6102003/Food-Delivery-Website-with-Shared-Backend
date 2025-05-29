@@ -3,10 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodRunner - Redirecting...</title>
-    <script>
-        // Redirect to the website folder
-        window.location.href = "website/";
+    <title>FoodRunner - Redirecting...</title>    <script>
+        // Get the base URL for GitHub Pages
+        var baseUrl = window.location.pathname.split('/');
+        // Remove empty elements and the last element (which would be the index.html)
+        baseUrl = baseUrl.filter(function(e) { return e });
+        
+        // If we're on GitHub Pages, the path will include the repository name
+        // So we ensure our redirect works both locally and on GitHub Pages
+        if (window.location.hostname === "subhash6102003.github.io") {
+            window.location.href = "/" + baseUrl.join('/') + "/website/";
+        } else {
+            // Local development
+            window.location.href = "website/";
+        }
     </script>
     <style>
         body {

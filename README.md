@@ -4,6 +4,13 @@ This project is a consumer-facing food delivery platform that connects with a se
 
 The system uses a MongoDB database to store and share data between the consumer website and the restaurant dashboard.
 
+## Deployment
+
+The frontend of this application is deployed on GitHub Pages and can be accessed at:
+[https://subhash6102003.github.io/Food-Delivery-Website-with-Shared-Backend/](https://subhash6102003.github.io/Food-Delivery-Website-with-Shared-Backend/)
+
+Note that while the frontend is static and viewable on GitHub Pages, the backend functionality requires connecting to a running backend server.
+
 ## Project Structure
 
 ```
