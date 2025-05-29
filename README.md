@@ -2,9 +2,9 @@
 
 This project consists of two interconnected websites:
 - `website` - Consumer-facing food delivery platform (current repository)
-- `website1` - Restaurant dashboard (already deployed separately)
+- `website1` - Restaurant dashboard (successfully deployed separately)
 
-Both websites are connected to a MongoDB database, allowing restaurants to upload menu details and manage orders, while customers can browse menus and place orders.
+Both websites are connected to a MongoDB database, allowing restaurants to upload menu details and manage orders, while customers can browse menus and place orders. The restaurant dashboard has been successfully deployed and is fully operational.
 
 ## Project Structure
 
@@ -85,12 +85,12 @@ The consumer website API will be available at `http://localhost:5001/api`.
 
 ### Restaurant Dashboard Backend
 
-The restaurant dashboard backend has already been deployed separately. It is available at:
+The restaurant dashboard backend has been successfully deployed to production. It is available at:
 
 - Dashboard URL: `https://restaurant-dashboard.fooddelivery.com`
 - API URL: `https://api.restaurant-dashboard.fooddelivery.com/api`
 
-If you need to run the restaurant dashboard locally for development purposes, please contact the administrator for access to the repository and setup instructions.
+The restaurant dashboard provides restaurant owners with the ability to manage their menu items and track orders in real-time. If you need to run the restaurant dashboard locally for development purposes, please contact the administrator for access to the repository and setup instructions.
 
 ## API Documentation
 
