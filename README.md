@@ -1,42 +1,44 @@
-# Food Delivery Platform with Shared Backend
+# Food Delivery Platform
 
-This project consists of two interconnected websites:
-- `website` - Consumer-facing food delivery platform (current repository)
-- `website1` - Restaurant dashboard (successfully deployed separately)
+This project is a consumer-facing food delivery platform that connects with a separately deployed restaurant dashboard system. The consumer website allows customers to browse restaurant menus and place orders online, while restaurant owners can manage their menus and track orders through the dashboard.
 
-Both websites are connected to a MongoDB database, allowing restaurants to upload menu details and manage orders, while customers can browse menus and place orders. The restaurant dashboard has been successfully deployed and is fully operational.
+The system uses a MongoDB database to store and share data between the consumer website and the restaurant dashboard.
 
 ## Project Structure
 
 ```
 food-delivery-website/
+├── start-mongodb.bat      # Script to start MongoDB locally
 ├── website/               # Consumer-facing website
-│   ├── index.html
-│   ├── scripts.js
-│   ├── styles.css
-│   └── backend/           # API for the consumer-facing website
-│       ├── package.json
-│       ├── server.js
+│   ├── index.html         # Main HTML file
+│   ├── scripts.js         # Frontend JavaScript
+│   ├── styles.css         # CSS styles
+│   ├── package.json       # Frontend dependencies
+│   └── backend/           # API for the website
+│       ├── package.json   # Backend dependencies
+│       ├── server.js      # Entry point for the server
 │       └── src/           # Server source code
 │           ├── config/    # Database configuration
+│           │   └── db.js  # MongoDB connection setup
 │           ├── controllers/
+│           │   ├── authController.js
+│           │   ├── menuController.js
+│           │   ├── orderController.js
+│           │   └── restaurantController.js
 │           ├── middleware/
-│           ├── models/    # Shared data models
-│           └── routes/    # API routes
-│
-└── website1/              # Restaurant dashboard
-    ├── index.html
-    ├── scripts.js
-    ├── styles.css
-    └── backend/           # API for the restaurant dashboard
-        ├── package.json
-        ├── server.js
-        └── src/           # Server source code
-            ├── config/    # Database configuration
-            ├── controllers/
-            ├── middleware/
-            ├── models/    # Shared data models
-            └── routes/    # API routes
+│           │   └── auth.js
+│           ├── models/    # Data models
+│           │   ├── MenuItem.js
+│           │   ├── Order.js
+│           │   ├── Restaurant.js
+│           │   └── User.js
+│           ├── routes/    # API routes
+│           │   ├── authRoutes.js
+│           │   ├── menuRoutes.js
+│           │   ├── orderRoutes.js
+│           │   └── restaurantRoutes.js
+│           └── services/
+│               └── dataService.js
 ```
 
 ## Shared Data
@@ -44,7 +46,7 @@ food-delivery-website/
 The following data is shared between the consumer website and restaurant dashboard:
 
 - **Restaurant Information**: Details about restaurants are accessible to both systems.
-- **Menu Items**: Menu items created in the restaurant dashboard (website1) are displayed on the consumer website.
+- **Menu Items**: Menu items created in the restaurant dashboard are displayed on the consumer website.
 - **Orders**: Orders placed on the consumer website are visible to restaurant owners in their dashboard.
 
 ## Setup Instructions
@@ -117,7 +119,7 @@ The restaurant dashboard provides restaurant owners with the ability to manage t
   - `GET /api/orders/:id` - Get a single order
   - `PUT /api/orders/:id/cancel` - Cancel an order
 
-### Restaurant Dashboard (website1) API Endpoints
+### Restaurant Dashboard API Endpoints
 
 - **Authentication**
   - `POST /api/auth/register` - Register a restaurant owner
