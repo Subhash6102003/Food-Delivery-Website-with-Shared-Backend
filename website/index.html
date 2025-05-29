@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodRunner - Food Delivery Service</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Inline CSS for additional text animations */
+        .text-animated {
+            display: inline-block;
+            opacity: 0;
+        }
+        
+        .highlight {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .highlight:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 8px;
+            background-color: rgba(76, 175, 80, 0.3);
+            z-index: -1;
+            transition: width 0.5s ease;
+        }
+        
+        h3, h2 {
+            background-image: linear-gradient(120deg, transparent 0%, transparent 100%);
+            background-repeat: no-repeat;
+            background-size: 0 100%;
+            transition: background-size 0.8s;
+        }
+        
+        /* Particle effects and background animations */
+        .floating-item {
+            position: absolute;
+            opacity: 0.7;
+            filter: blur(1px);
+            will-change: transform;
+        }
+        
+        .background-canvas {
+            pointer-events: none;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow: auto;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: #222;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #fff;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #fff;
+        }
+        
+        .modal-body form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-tab {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .modal-tab button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            color: #aaa;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .modal-tab button:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #4CAF50;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        .modal-tab button.active {
+            color: #fff;
+        }
+        
+        .modal-tab button.active:after {
+            transform: scaleX(1);
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .login-providers {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #333;
+            color: #fff;
+            transition: all 0.3s;
+        }
+        
+        .provider-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .provider-btn i {
+            font-size: 18px;
+        }
+        
+        /* Cart and order modal */
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+            align-items: center;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            color: #4CAF50;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quantity-btn:hover {
+            background-color: #333;
+        }
+        
+        .quantity-value {
+            width: 30px;
+            text-align: center;
+        }
+        
+        .remove-item {
+            color: #F44336;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .remove-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .cart-summary {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .cart-total-label {
+            font-weight: 500;
+        }
+        
+        .cart-total-value {
+            font-weight: 700;
+            color: #4CAF50;
+        }
+        
+        /* User account dropdown */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .user-dropdown-toggle:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .user-dropdown-toggle .avatar {
+            width: 30px;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .user-dropdown-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #222;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            width: 200px;
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+        }
+        
+        .user-dropdown-content.active {
+            display: block;
+        }
+        
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            color: #eee;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .user-dropdown-item:hover {
+            background-color: #333;
+        }
+        
+        .user-dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .user-dropdown-divider {
+            height: 1px;
+            background-color: #444;
+            margin: 5px 0;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #F44336;
+        }
+        
+        .toast-info {
+            border-left: 4px solid #2196F3;
+        }
+        
+        .toast-warning {
+            border-left: 4px solid #FF9800;
+        }
+        
+        .toast i {
+            font-size: 18px;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Menu Items Styles */
+        .restaurant-details {
+            margin-bottom: 20px;
+        }
+
+        .restaurant-tags {
+            display: flex;
+            gap: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .restaurant-rating {
+            color: #4CAF50;
+        }
+
+        .menu-categories {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            gap: 10px;
+        }
+
+        .menu-category {
+            padding: 8px 15px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-category.active {
+            background-color: #4CAF50;
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background-color: #3a3a3a;
+        }
+
+        .menu-item-details {
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .menu-item-name {
+            margin: 0 0 5px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .menu-item-description {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .menu-item-price {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .menu-item-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+
+        .cart-summary-mini {
+            color: #ddd;
+        }
+
+        .cart-summary-mini strong {
+            color: #4CAF50;
+        }
+
+        .empty-cart-message, .empty-category {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+        }
+
+        .or-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .or-divider:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background-color: #444;
+            z-index: 0;
+        }
+
+        .or-divider span {
+            background-color: #222;
+            padding: 0 10px;
+            position: relative;
+            color: #aaa;
+            z-index: 1;
+        }
+
+        .form-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 20px;
+            font-size: 14px;
+        }
+
+        .form-option a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .form-option label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #aaa;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="checkbox"] {
+            accent-color: #4CAF50;
+        }
+
+        /* Show an indicator for items with add/remove buttons */
+        .item-with-actions {
+            position: relative;
+        }
+
+        .item-with-actions:after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating food icons for background animation -->
+    <div class="floating-items-container"></div>
+    
+    <!-- Toast notifications container -->
+    <div class="toast-container"></div>
+    
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>FoodRunner</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#restaurants">Restaurants</a></li>
+                <li><a href="#orders">My Orders</a></li>
+                <li><a href="#donate">Donate Food</a></li>
+                <li><a href="#ngo">NGO Partners</a></li>
+            </ul>
+            <div class="user-actions">
+                <button class="btn btn-outline" id="loginBtn">Log In</button>
+                <button class="btn btn-primary" id="signupBtn">Sign Up</button>
+                <!-- Cart icon (will always be visible) -->
+                <div class="cart-icon">
+                    <button class="btn-icon" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge" id="cartCount">0</span>
+                    </button>
+                </div>
+                <!-- User dropdown (will show after login) -->
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <button class="user-dropdown-toggle">
+                        <span class="avatar">U</span>
+                        <span class="username">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown-content">
+                        <a href="#" class="user-dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="#orders" class="user-dropdown-item">
+                            <i class="fas fa-list"></i>
+                            <span>My Orders</span>
+                        </a>
+                        <a href="#" class="user-dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Favorites</span>
+                        </a>
+                        <a href="#" class="user-dropdown-item">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <span>My Donations</span>
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="#" class="user-dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                        <a href="#" class="user-dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero" style="background-color: #121212; min-height: 500px;">
+        <div class="hero-content">
+            <h1>Delicious Food Delivered To Your Door</h1>
+            <p>Choose from thousands of restaurants and get your favorite meals delivered straight to your doorstep with just a few clicks.</p>
+            <div class="hero-actions">
+                <a href="#restaurants" class="btn btn-primary btn-large">Order Now</a>
+                <a href="#app-download" class="btn btn-outline btn-large">Download App</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Delicious Food">
+        </div>
+    </section>
+
+    <section id="restaurants" class="restaurants" style="background-color: #1e1e1e; min-height: 500px;">
+        <div class="section-header">
+            <h2>Popular Restaurants</h2>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="restaurant-grid">
+            <!-- Restaurant Cards -->
+            <div class="restaurant-card">
+                <div class="restaurant-image">
+                    <img src="https://images.unsplash.com/photo-1599458252573-56ae36120de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Burger Palace">
+                    <div class="rating"><i class="fas fa-star"></i> 4.8</div>
+                </div>
+                <div class="restaurant-info">
+                    <h3>Burger Palace</h3>
+                    <div class="cuisine">American, Fast Food</div>
+                    <div class="restaurant-meta">
+                        <span><i class="fas fa-clock"></i> 25-30 min</span>
+                        <span><i class="fas fa-motorcycle"></i> Free Delivery</span>
+                    </div>
+                </div>
+            </div>
+            <div class="restaurant-card">
+                <div class="restaurant-image">
+                    <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Pizza Heaven">
+                    <div class="rating"><i class="fas fa-star"></i> 4.5</div>
+                </div>
+                <div class="restaurant-info">
+                    <h3>Pizza Heaven</h3>
+                    <div class="cuisine">Italian, Pizza</div>
+                    <div class="restaurant-meta">
+                        <span><i class="fas fa-clock"></i> 30-45 min</span>
+                        <span><i class="fas fa-motorcycle"></i> $2 Delivery</span>
+                    </div>
+                </div>
+            </div>
+            <div class="restaurant-card">
+                <div class="restaurant-image">
+                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Spice Garden">
+                    <div class="rating"><i class="fas fa-star"></i> 4.7</div>
+                </div>
+                <div class="restaurant-info">
+                    <h3>Spice Garden</h3>
+                    <div class="cuisine">Indian, Curry</div>
+                    <div class="restaurant-meta">
+                        <span><i class="fas fa-clock"></i> 40-50 min</span>
+                        <span><i class="fas fa-motorcycle"></i> Free Delivery</span>
+                    </div>
+                </div>
+            </div>
+            <div class="restaurant-card">
+                <div class="restaurant-image">
+                    <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Sushi Master">
+                    <div class="rating"><i class="fas fa-star"></i> 4.9</div>
+                </div>
+                <div class="restaurant-info">
+                    <h3>Sushi Master</h3>
+                    <div class="cuisine">Japanese, Sushi</div>
+                    <div class="restaurant-meta">
+                        <span><i class="fas fa-clock"></i> 30-40 min</span>
+                        <span><i class="fas fa-motorcycle"></i> $3 Delivery</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="donate" class="donate" style="background-color: #121212; min-height: 500px;">
+        <div class="section-header">
+            <h2>Food Donation</h2>
+        </div>
+        <div class="donate-container">
+            <div class="donate-form">
+                <h3>Donate Excess Food</h3>
+                <p>Help reduce food waste and feed those in need by donating your excess food</p>
+                <form>
+                    <div class="form-group">
+                        <label for="donationReason">Reason for donation</label>
+                        <textarea id="donationReason" placeholder="E.g. Leftover from an event, fewer guests than expected..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Approximate quantity</label>
+                        <input type="text" id="quantity" placeholder="E.g. 5 meals, 2kg of rice...">
+                    </div>
+                    <div class="form-group">
+                        <label for="freshness">Freshness (hours since preparation)</label>
+                        <input type="number" id="freshness" placeholder="Enter number of hours">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Pickup address</label>
+                        <textarea id="address" placeholder="Enter your complete address"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit Donation</button>
+                </form>
+            </div>
+            <div class="donate-info">
+                <div class="info-card">
+                    <div class="icon">
+                        <i class="fas fa-handshake-angle"></i>
+                    </div>
+                    <h4>NGO Partnerships</h4>
+                    <p>We work with verified NGOs and charitable organizations to ensure your donations reach those who need them most.</p>
+                </div>
+                <div class="info-card">
+                    <div class="icon">
+                        <i class="fas fa-truck-fast"></i>
+                    </div>
+                    <h4>Quick Pickup</h4>
+                    <p>Our volunteer network ensures that food donations are picked up promptly to maintain freshness.</p>
+                </div>
+                <div class="info-card">
+                    <div class="icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h4>Restaurant Partners</h4>
+                    <p>Restaurants can mark leftover food at closing time for donation to help feed the hungry.</p>
+                </div>
+                <div class="info-card">
+                    <div class="icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Make an Impact</h4>
+                    <p>Track your donation history and see the positive impact you're making in your community.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ngo" class="ngo-partners" style="background-color: #1e1e1e; min-height: 500px;">
+        <div class="section-header">
+            <h2>Our NGO Partners</h2>
+        </div>
+        <div class="ngo-grid">
+            <div class="ngo-card">
+                <div class="ngo-logo">
+                    <img src="https://placehold.co/150x150/1e1e1e/4CAF50/?text=NGO" alt="NGO Partner">
+                </div>
+                <h3>Food For All</h3>
+                <p>Working to end hunger in urban areas by redistributing excess food to shelters.</p>
+                <button class="btn btn-outline btn-sm">Learn More</button>
+            </div>
+            <div class="ngo-card">
+                <div class="ngo-logo">
+                    <img src="https://placehold.co/150x150/1e1e1e/4CAF50/?text=NGO" alt="NGO Partner">
+                </div>
+                <h3>Hunger Relief</h3>
+                <p>Providing meals to underserved communities and homeless populations.</p>
+                <button class="btn btn-outline btn-sm">Learn More</button>
+            </div>
+            <div class="ngo-card">
+                <div class="ngo-logo">
+                    <img src="https://placehold.co/150x150/1e1e1e/4CAF50/?text=NGO" alt="NGO Partner">
+                </div>
+                <h3>Community Kitchen</h3>
+                <p>Operating community kitchens that serve nutritious meals to those in need.</p>
+                <button class="btn btn-outline btn-sm">Learn More</button>
+            </div>
+        </div>
+        <div class="ngo-cta">
+            <h3>Are you an NGO interested in partnering with us?</h3>
+            <button class="btn btn-primary">Register Your Organization</button>
+        </div>
+    </section>
+
+    <section class="app-download">
+        <div class="app-content">
+            <h2>Download Our Mobile App</h2>
+            <p>Get the full experience with our mobile app. Order food, track deliveries, and donate excess food - all from your smartphone.</p>
+            <div class="app-buttons">
+                <a href="#" class="app-button">
+                    <i class="fab fa-google-play"></i>
+                    <span>Google Play</span>
+                </a>
+                <a href="#" class="app-button">
+                    <i class="fab fa-apple"></i>
+                    <span>App Store</span>
+                </a>
+            </div>
+        </div>
+        <div class="app-image">
+            <img src="https://placehold.co/300x600/1e1e1e/4CAF50/?text=Mobile+App" alt="Mobile App">
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-main">
+            <div class="footer-col">
+                <h4>FoodRunner</h4>
+                <p>Making food delivery a force for good in the community.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">How It Works</a></li>
+                    <li><a href="#">Restaurants</a></li>
+                    <li><a href="#">Donation Process</a></li>
+                    <li><a href="#">Volunteer</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Get Help</h4>
+                <ul>
+                    <li><a href="#">Order Status</a></li>
+                    <li><a href="#">Payment Options</a></li>
+                    <li><a href="#">Donation FAQs</a></li>
+                    <li><a href="#">Restaurant Partnership</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p>Subscribe to our newsletter for updates on new restaurants and donation opportunities.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email">
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 FoodRunner. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+    <!-- Add GSAP and Three.js libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
+
+    <!-- Modals -->
+    
+    <!-- Authentication Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Welcome to FoodRunner</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-tab">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="signup">Sign Up</button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form" style="display: flex;">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group password-container">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-option">
+                        <label>
+                            <input type="checkbox" id="rememberMe">
+                            Remember me
+                        </label>
+                        <a href="#forgot-password">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                    
+                    <div class="or-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="login-providers">
+                        <button type="button" class="provider-btn google">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button type="button" class="provider-btn facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button type="button" class="provider-btn twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Sign Up Form -->
+                <form id="signupForm" class="auth-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" required>
+                    </div>
+                    <div class="form-group password-container">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-group password-container">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-option">
+                        <label>
+                            <input type="checkbox" id="agreeTerms" required>
+                            I agree to the <a href="#terms">Terms of Service</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                    
+                    <div class="or-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="login-providers">
+                        <button type="button" class="provider-btn google">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button type="button" class="provider-btn facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button type="button" class="provider-btn twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Restaurant Menu Modal -->
+    <div class="modal" id="menuModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="restaurantName">Restaurant Name</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="restaurant-details">
+                <div class="restaurant-tags">
+                    <span id="restaurantCuisine">Cuisine</span>
+                    <span><i class="fas fa-star"></i> <span id="restaurantRating">4.5</span></span>
+                    <span><i class="fas fa-clock"></i> <span id="restaurantTime">30-40 min</span></span>
+                </div>
+            </div>
+            <div class="menu-categories">
+                <button class="menu-category active" data-category="all">All</button>
+                <button class="menu-category" data-category="popular">Popular</button>
+                <button class="menu-category" data-category="main">Main Dishes</button>
+                <button class="menu-category" data-category="sides">Sides</button>
+                <button class="menu-category" data-category="desserts">Desserts</button>
+                <button class="menu-category" data-category="drinks">Drinks</button>
+            </div>
+            <div class="menu-items">
+                <!-- Menu items will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <div class="cart-summary-mini">
+                    Cart total: <strong>$0.00</strong>
+                </div>
+                <button class="btn btn-primary" id="viewCartBtn">View Cart</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Your Cart</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="cart-items">
+                <!-- Cart items will be populated by JavaScript -->
+            </div>
+            <div class="cart-summary">
+                <div class="cart-total">
+                    <span class="cart-total-label">Subtotal:</span>
+                    <span class="cart-total-value">$0.00</span>
+                </div>
+                <div class="cart-total">
+                    <span class="cart-total-label">Delivery Fee:</span>
+                    <span class="cart-total-value">$0.00</span>
+                </div>
+                <div class="cart-total">
+                    <span class="cart-total-label">Tax:</span>
+                    <span class="cart-total-value">$0.00</span>
+                </div>
+                <div class="cart-total">
+                    <span class="cart-total-label">Total:</span>
+                    <span class="cart-total-value">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="continueShopping">Continue Shopping</button>
+                <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NGO Registration Modal -->
+    <div class="modal" id="ngoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Register Your NGO</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="ngoRegistrationForm">
+                    <div class="form-group">
+                        <label for="ngoName">NGO Name</label>
+                        <input type="text" id="ngoName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngoEmail">Email Address</label>
+                        <input type="email" id="ngoEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngoPhone">Contact Number</label>
+                        <input type="tel" id="ngoPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngoAddress">Office Address</label>
+                        <textarea id="ngoAddress" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngoDescription">Description</label>
+                        <textarea id="ngoDescription" placeholder="Tell us about your NGO and how you help with food distribution" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngoRegistration">Registration Number</label>
+                        <input type="text" id="ngoRegistration" required>
+                    </div>
+                    <div class="form-option">
+                        <label>
+                            <input type="checkbox" id="ngoTerms" required>
+                            I agree to the <a href="#ngo-terms">Terms of Service</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="scripts.js"></script>
+</body>
+</html>
