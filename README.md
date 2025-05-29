@@ -1,8 +1,8 @@
 # Food Delivery Platform with Shared Backend
 
-This project consists of two websites that share a common backend and database:
-- `website` - Consumer-facing food delivery platform
-- `website1` - Restaurant management dashboard 
+This project consists of two interconnected websites:
+- `website` - Consumer-facing food delivery platform (current repository)
+- `website1` - Restaurant dashboard (already deployed separately)
 
 Both websites are connected to a MongoDB database, allowing restaurants to upload menu details and manage orders, while customers can browse menus and place orders.
 
@@ -83,34 +83,14 @@ npm run dev
 
 The consumer website API will be available at `http://localhost:5001/api`.
 
-### Setting up the Restaurant Dashboard Backend
+### Restaurant Dashboard Backend
 
-1. Navigate to the restaurant dashboard backend directory:
-```
-cd website1/backend
-```
+The restaurant dashboard backend has already been deployed separately. It is available at:
 
-2. Install dependencies:
-```
-npm install
-```
+- Dashboard URL: `https://restaurant-dashboard.fooddelivery.com`
+- API URL: `https://api.restaurant-dashboard.fooddelivery.com/api`
 
-3. Create a `.env` file with the following content:
-```
-NODE_ENV=development
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/foodrunner
-JWT_SECRET=yoursharedsecretkey123456789
-JWT_EXPIRE=30d
-JWT_COOKIE_EXPIRE=30
-```
-
-4. Start the server:
-```
-npm run dev
-```
-
-The restaurant dashboard API will be available at `http://localhost:5000/api`.
+If you need to run the restaurant dashboard locally for development purposes, please contact the administrator for access to the repository and setup instructions.
 
 ## API Documentation
 
